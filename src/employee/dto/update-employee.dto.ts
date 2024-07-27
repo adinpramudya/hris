@@ -1,33 +1,63 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateEmployeeDto } from './create-employee.dto';
-import { IsDate, IsEmail, IsNotEmpty, IsOptional, Max } from 'class-validator';
+import {
+  IsDate,
+  IsEmail,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  Max,
+} from 'class-validator';
+import { EmployeeType, Gender, MaritalStatus } from 'src/enums/enum';
+import { Allowance } from 'src/allowance/entities/allowance.entity';
+import { Type } from 'class-transformer';
+import { IsPeriodeOutDateRequired } from 'src/validations/is-periode-out-date-required.validator';
 
 export class UpdateEmployeeDto extends PartialType(CreateEmployeeDto) {
   @IsOptional()
-  @IsNotEmpty({ message: 'Nama lengkap tidak boleh kosong' })
   name: string;
   @IsOptional()
-  @IsNotEmpty({ message: 'Tempat lahir tidak boleh kosong' })
   placeOfBirth: string;
   @IsOptional()
-  @IsNotEmpty({ message: 'Tanggal lahir tidak boleh kosong' })
   @IsOptional()
-  @IsDate({ message: 'Format Tanggal Salah' })
   dateOfBirth: Date;
   @IsOptional()
   @IsEmail()
   email: string;
   @IsOptional()
-  @IsNotEmpty({ message: 'Jenis kelamin tidak boleh kosong' })
-  gender: string;
+  @IsEnum(Gender)
+  gender: Gender;
   @IsOptional()
   rekeningNumber: string;
   @IsOptional()
-  @IsNotEmpty({ message: 'Alamat tidak boleh kosong' })
   address: string;
   @IsOptional()
-  @IsNotEmpty({ message: 'Cuti tidak boleh kosong' })
   @IsOptional()
   @Max(12)
   paidLeave: number;
+  @IsOptional()
+  allowences: Allowance[];
+  @IsOptional()
+  nik: string;
+  @IsOptional()
+  @IsEnum(MaritalStatus)
+  maritalStatus: MaritalStatus;
+  @IsOptional()
+  dateOfEntry: Date;
+  @IsOptional()
+  @IsNumber()
+  numberOfChildren: number;
+  npwp: string;
+  @IsOptional()
+  salaryBasic: number;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  @IsPeriodeOutDateRequired()
+  periodeEndDate?: Date;
+
+  @IsOptional()
+  @IsEnum(EmployeeType)
+  employeeType: EmployeeType;
 }

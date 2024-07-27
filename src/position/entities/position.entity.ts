@@ -1,4 +1,4 @@
-import { Allowance } from 'src/allowance/entities/allowance.entity';
+import { Employee } from 'src/employee/entities/employee.entity';
 import {
   Column,
   CreateDateColumn,
@@ -17,12 +17,16 @@ export class Position {
   name: string;
 
   @Column()
-  salaryBasic: number;
+  description: string;
 
-  @OneToMany(() => Allowance, (allowence) => allowence.position, {
-    cascade: true,
-  })
-  allowences: Allowance[];
+  @Column()
+  positionLevel: string;
+
+  @Column({ type: 'decimal' })
+  salaryBasicMin: number;
+
+  @Column({ type: 'decimal' })
+  salaryBasicMax: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -32,4 +36,7 @@ export class Position {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => Employee, (employee) => employee.position)
+  employees: Employee[];
 }

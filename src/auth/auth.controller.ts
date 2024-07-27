@@ -10,4 +10,9 @@ export class AuthController {
   signIn(@Body() signInDto: Record<string, any>) {
     return this.authService.signIn(signInDto.username, signInDto.password);
   }
+
+  @Post('refresh')
+  async refresh(@Body() refreshDto: { refreshToken: string }) {
+    return this.authService.refresh(refreshDto.refreshToken);
+  }
 }

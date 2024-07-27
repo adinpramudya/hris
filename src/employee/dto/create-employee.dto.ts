@@ -1,13 +1,19 @@
 import {
   IsEmail,
+  IsEnum,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   Max,
+  MaxLength,
   Min,
   MinLength,
 } from 'class-validator';
+import { Allowance } from 'src/allowance/entities/allowance.entity';
+import { EmployeeType, Gender, MaritalStatus } from 'src/enums/enum';
 import { Position } from 'src/position/entities/position.entity';
 import { Role } from 'src/role/entities/role.entity';
+import { IsPeriodeOutDateRequired } from 'src/validations/is-periode-out-date-required.validator';
 
 export class CreateEmployeeDto {
   @IsNotEmpty({ message: 'Nama lengkap tidak boleh kosong' })
@@ -17,12 +23,14 @@ export class CreateEmployeeDto {
   @IsNotEmpty({ message: 'Tempat lahir tidak boleh kosong' })
   placeOfBirth: string;
   @IsNotEmpty({ message: 'Tanggal lahir tidak boleh kosong' })
-  // @IsDate({ message: 'Format Tanggal Salah' })
   dateOfBirth: Date;
   @IsEmail()
   email: string;
   @IsNotEmpty({ message: 'Jenis kelamin tidak boleh kosong' })
-  gender: string;
+  @IsEnum(Gender, {
+    message: 'Jenis kelamin harus salah satu dari nilai berikut: MALE, FEMALE',
+  })
+  gender: Gender;
   rekeningNumber: string;
   @IsNotEmpty({ message: 'Alamat tidak boleh kosong' })
   address: string;
@@ -39,5 +47,30 @@ export class CreateEmployeeDto {
   @IsNotEmpty({ message: 'Role Tidak boleh kosong' })
   role: Role;
   @IsNotEmpty({ message: 'Type karyawan tidak boleh kosong' })
-  employeeType: string;
+  @IsEnum(EmployeeType)
+  employeeType: EmployeeType;
+  allowences: Allowance[];
+  @IsNotEmpty({ message: 'NIK tidak boleh kosong' })
+  @MinLength(16, { message: 'NIK Harus berisi 16 angka' })
+  @MaxLength(16, { message: 'NIK Harus berisi 16 angka' })
+  nik: string;
+  @IsNotEmpty({ message: 'Status Pernikahan tidak boleh kosong' })
+  @IsEnum(MaritalStatus, {
+    message:
+      'Status Perkawinan harus salah satu dari nilai berikut: MARRIED, SINGLE',
+  })
+  maritalStatus: MaritalStatus;
+  @IsNotEmpty({ message: 'Tanggal Masuk tidak boleh kosong' })
+  dateOfEntry: Date;
+  @IsOptional()
+  @IsInt()
+  numberOfChildren: number;
+  @IsNotEmpty({ message: 'NPWP tidak boleh kosong' })
+  npwp: string;
+
+  @IsNotEmpty({ message: 'Gaji Pokok tidak boleh kosong' })
+  salaryBasic: number;
+
+  @IsPeriodeOutDateRequired()
+  periodeEndDate: Date;
 }

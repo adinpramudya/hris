@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -33,8 +34,7 @@ export class User {
   @Column({ default: false })
   isActive: boolean;
 
-  @OneToOne(() => Role)
-  @JoinColumn()
+  @ManyToOne(() => Role, (role) => role.users)
   role: Role;
 
   @OneToOne(() => Employee, { cascade: true })

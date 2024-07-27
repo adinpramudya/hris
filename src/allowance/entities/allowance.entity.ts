@@ -1,4 +1,4 @@
-import { Position } from 'src/position/entities/position.entity';
+import { Employee } from 'src/employee/entities/employee.entity';
 import {
   Column,
   CreateDateColumn,
@@ -28,6 +28,6 @@ export class Allowance {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Position, (position) => position.allowences)
-  position: Position;
+  @ManyToOne(() => Employee, (employee) => employee.allowences)
+  employee: Employee;
 }

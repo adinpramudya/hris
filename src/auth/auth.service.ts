@@ -12,21 +12,45 @@ export class AuthService {
   async signIn(
     username: string,
     pass: string,
-  ): Promise<{ access_token: string }> {
+  ): Promise<{ email: string; access_token: string; refresh_token: string }> {
     const user = await this.usersService.findOneByUsernameOrEmail(username);
-    console.log('Plain password:', pass);
-    console.log('Hashed password from database:', user.password);
 
     if (!user || !(await bcrypt.compare(pass, user.password))) {
       throw new UnauthorizedException();
     }
     const payload = {
-      sub: user.employee.id,
+      id: user.employee.id,
       username: user.username,
-      role: user.role,
+      role: user.role.name,
     };
     return {
+      email: user.email,
       access_token: await this.jwtService.signAsync(payload),
+      refresh_token: await this.jwtService.signAsync(payload, {
+        expiresIn: '2d',
+      }),
     };
+  }
+
+  async refresh(
+    refreshToken: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken);
+
+      const newAccessToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '1d',
+      });
+      const newRefreshToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '2d',
+      });
+
+      return {
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 }

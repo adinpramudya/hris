@@ -1,11 +1,16 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
-import { Allowance } from 'src/allowance/entities/allowance.entity';
 
 export class CreatePositionDto {
   @IsNotEmpty({ message: 'Nama Posisi tidak boleh kosong' })
   name: string;
-  @IsNotEmpty({ message: 'Gaji Pokok tidak boleh kosong' })
+  @IsNotEmpty({ message: 'Gaji Minimal Pokok tidak boleh kosong' })
   @IsNumber()
-  salaryBasic: number;
-  allowence: Allowance[];
+  salaryBasicMin: number;
+  @IsNotEmpty({ message: 'Gaji Maksimal Pokok tidak boleh kosong' })
+  @IsNumber()
+  salaryBasicMax: number;
+  @IsNotEmpty({ message: 'Deskripsi tidak boleh kosong' })
+  description: string;
+  @IsNotEmpty({ message: 'Posisi Level tidak boleh kosong' })
+  positionLevel: string;
 }

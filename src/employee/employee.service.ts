@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { FindAllEmployeesDto } from './dto/find-all-employee.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -13,26 +18,56 @@ export class EmployeeService {
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
     private readonly userService: UserService,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
   async create(createEmployeeDto: CreateEmployeeDto) {
-    const employee = this.employeeRepository.create(createEmployeeDto);
-    const savedEmployee = await this.employeeRepository.save(employee);
-    const newUser: CreateUserDto = {
-      username: createEmployeeDto.username,
-      email: createEmployeeDto.email,
-      password: createEmployeeDto.password,
-      role: createEmployeeDto.role,
-      isActive: false,
-      employee: savedEmployee,
-    };
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    let savedEmployee = new Employee();
+    try {
+      const employee = this.employeeRepository.create(createEmployeeDto);
+      savedEmployee = await this.employeeRepository.save(employee);
+      const newUser: CreateUserDto = {
+        username: createEmployeeDto.username,
+        email: createEmployeeDto.email,
+        password: createEmployeeDto.password,
+        role: createEmployeeDto.role,
+        isActive: false,
+        employee: savedEmployee,
+      };
 
-    this.userService.create(newUser);
-    return savedEmployee;
+      this.userService.create(newUser);
+      return savedEmployee;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.log('ERRORRR ', error);
+      throw new InternalServerErrorException('Terjadi Kesalahan pada server');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  findAll() {
+  async findAll(query: FindAllEmployeesDto) {
+    const { page, size, direction, sortBy, search } = query;
+
+    const skip = (page - 1) * size;
+    const take = size;
+
+    const whereOptions = search
+      ? {
+          name: Like(`%${search}%`),
+        }
+      : {};
+
     return this.employeeRepository.find({
       relations: ['position'],
+      where: whereOptions,
+      order: {
+        [sortBy]: direction,
+      },
+      skip,
+      take,
     });
   }
 
