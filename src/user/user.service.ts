@@ -5,11 +5,14 @@ import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ChangePasswordDto } from './dto/change-password-dto';
+import { MailService } from 'src/mail/mail.service';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private mailService: MailService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -18,6 +21,7 @@ export class UserService {
     const passwordHash = await bcrypt.hash(password, saltOrRounds);
     createUserDto.password = passwordHash;
     const user = this.userRepository.create(createUserDto);
+
     return this.userRepository.save(user);
   }
 
@@ -46,6 +50,31 @@ export class UserService {
       );
     }
     return user;
+  }
+
+  async changePassword(
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const user = await this.userRepository.findOneBy({
+        id: changePasswordDto.userId,
+      });
+      if (!user) {
+        return { success: false, message: 'User not found.' };
+      }
+
+      const hashedPassword = await bcrypt.hash(
+        changePasswordDto.newPassword,
+        10,
+      );
+      user.password = hashedPassword;
+      await this.userRepository.save(user);
+
+      return { success: true, message: 'Password successfully changed.' };
+    } catch (error) {
+      console.error('Error changing password:', error);
+      return { success: false, message: 'Failed to change password.' };
+    }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {

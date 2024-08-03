@@ -41,9 +41,9 @@ export class CreateEmployeeDto {
   paidLeave: number;
   @IsNotEmpty({ message: 'Posisi tidak boleh kosong' })
   position: Position;
-  @IsNotEmpty({ message: 'Password Tidak boleh kosong' })
-  @MinLength(8, { message: 'Minimal 8 karakter' })
-  password: string;
+  // @IsNotEmpty({ message: 'Password Tidak boleh kosong' })
+  // @MinLength(8, { message: 'Minimal 8 karakter' })
+  // password: string;
   @IsNotEmpty({ message: 'Role Tidak boleh kosong' })
   role: Role;
   @IsNotEmpty({ message: 'Type karyawan tidak boleh kosong' })

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selamat Datang di PT. XXX</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        width: 50%;
+      }
+      header {
+        text-align: center;
+      }
+      .footer {
+        text-align: center;
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 20px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      ul li {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Selamat Datang di PT. XXX</h1>
+    </header>
+    <main>
+      <p>Hi {{sayHello}} {{name}},</p>
+      <p>
+        Selamat datang di PT. XXX! Kami sangat senang Anda bergabung dengan
+        kami.
+      </p>
+      <p>Berikut adalah informasi login Anda:</p>
+      <ul>
+        <li><strong>Username:</strong> {{email}}</li>
+        <li><strong>Password:</strong> {{password}}</li>
+      </ul>
+      <p>
+        <strong>Himbauan:</strong> Demi keamanan, kami sangat menyarankan Anda
+        untuk segera mengganti password default ini setelah Anda berhasil login
+        pertama kali.
+      </p>
+      <p>Silakan simpan informasi ini dengan aman.</p>
+    </main>
+    <div class="footer">
+      <p>Salam,</p>
+      <p>Admin PT. XXX</p>
+      <p>PT. XXX, Alamat Perusahaan, Nomor Telepon</p>
+    </div>
+  </body>
+</html>

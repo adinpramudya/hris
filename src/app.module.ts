@@ -14,6 +14,8 @@ import { Position } from './position/entities/position.entity';
 import { Employee } from './employee/entities/employee.entity';
 import { Allowance } from './allowance/entities/allowance.entity';
 import { AuthModule } from './auth/auth.module';
+import { MailService } from './mail/mail.service';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -47,8 +49,9 @@ import { AuthModule } from './auth/auth.module';
     PositionModule,
     AllowanceModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MailService],
 })
 export class AppModule {}

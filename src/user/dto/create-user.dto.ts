@@ -16,6 +16,9 @@ export class CreateUserDto {
   @IsOptional()
   isActive: boolean = false;
 
+  @IsOptional()
+  isDefault: boolean = true;
+
   role: CreateRoleDto;
   employee: Employee;
 }

@@ -10,6 +10,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password-dto';
 // import { CustomController } from 'src/decorators/custom.controller.decorator';
 
 @Controller('api/v1')
@@ -19,6 +20,11 @@ export class UserController {
   @Post('users')
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
+  }
+
+  @Post('change-password')
+  changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+    return this.userService.changePassword(changePasswordDto);
   }
 
   @Get('users')
