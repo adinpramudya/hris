@@ -34,6 +34,10 @@ import { MailModule } from './mail/mail.module';
         database: configService.get<string>('DATABASE_DATABASE'),
         entities: [User, Role, Position, Employee, Allowance],
         synchronize: true,
+        migrations: ['src/database/migrations/**/*{.ts,.js}'],
+        cli: {
+          migrationsDir: 'src/database/migrations',
+        },
       }),
     }),
     TypeOrmModule.forFeature([

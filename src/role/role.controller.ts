@@ -6,12 +6,19 @@ import {
   Param,
   Delete,
   Controller,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { RolesGuard } from 'src/guard/roles.guard';
+import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { PageableDto } from 'src/common/dto/pageable.dto';
 // import { CustomController } from 'src/decorators/custom.controller.decorator';
-
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 @Controller('api/v1')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
@@ -22,8 +29,8 @@ export class RoleController {
   }
 
   @Get('roles')
-  findAll() {
-    return this.roleService.findAll();
+  findAll(@Query() query: PageableDto) {
+    return this.roleService.findAll(query);
   }
 
   @Get('roles/:id')

@@ -12,7 +12,12 @@ export class AuthService {
   async signIn(
     username: string,
     pass: string,
-  ): Promise<{ email: string; access_token: string; refresh_token: string }> {
+  ): Promise<{
+    email: string;
+    name: string;
+    access_token: string;
+    refresh_token: string;
+  }> {
     const user = await this.usersService.findOneByUsernameOrEmail(username);
 
     if (!user || !(await bcrypt.compare(pass, user.password))) {
@@ -25,6 +30,7 @@ export class AuthService {
     };
     return {
       email: user.email,
+      name: user.employee.name,
       access_token: await this.jwtService.signAsync(payload),
       refresh_token: await this.jwtService.signAsync(payload, {
         expiresIn: '2d',

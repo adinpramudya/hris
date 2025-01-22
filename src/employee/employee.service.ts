@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -15,10 +13,10 @@ import { DataSource, Like, Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { FindAllEmployeesDto } from './dto/find-all-employee.dto';
-import { MetaResponse } from 'src/response/meta-dto';
 import { MailService } from 'src/mail/mail.service';
 import { Gender } from 'src/enums/enum';
 import { User } from 'src/user/entities/user.entity';
+import { ApiResponse } from 'src/common/ApiResponse/api-response';
 
 @Injectable()
 export class EmployeeService {
@@ -76,14 +74,19 @@ export class EmployeeService {
       );
 
       this.userService.create(newUser);
-      return savedEmployee;
+      return new ApiResponse<Employee>(
+        201,
+        'Employee has been created successfully',
+        new Date(),
+        savedEmployee,
+      );
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.logger.error(error);
       if (error.response?.statusCode === 400) {
         throw new BadRequestException(error.response.message);
       } else {
-        throw new InternalServerErrorException('Terjadi Kesalahan pada server');
+        throw new InternalServerErrorException('Something went wrong');
       }
     } finally {
       await queryRunner.release();
@@ -91,7 +94,13 @@ export class EmployeeService {
   }
 
   async findAll(query: FindAllEmployeesDto): Promise<any> {
-    const { page, size, direction, sortBy, search } = query;
+    const {
+      page = 1,
+      size = 10,
+      direction = 'ASC',
+      sortBy = 'id',
+      search,
+    } = query;
 
     try {
       const skip = (page - 1) * size;
@@ -103,47 +112,33 @@ export class EmployeeService {
           }
         : {};
 
-      // Query untuk data yang dipaginasi
-      const [employees, total] = await this.employeeRepository.findAndCount({
-        relations: ['position'],
-        where: whereOptions,
-        order: {
-          [sortBy]: direction,
+      const [employees, totalData] = await this.employeeRepository.findAndCount(
+        {
+          relations: ['position'],
+          where: whereOptions,
+          order: {
+            [sortBy]: direction,
+          },
+          skip,
+          take,
         },
-        skip,
-        take,
-      });
+      );
 
       // Data kosong dengan metadata pagination
-      const pagination: MetaResponse = {
-        status: 'success',
-        message: 'Successfully request',
-        timestamp: new Date(),
-        page,
-        limit: size,
-        totalPages: Math.ceil(total / size),
-        totalItems: total,
-      };
-
-      // Jika data kosong
-      const response: any = {
-        pagination,
-        data: employees.length > 0 ? employees : [], // Menyediakan data kosong jika tidak ada item
-      };
-
-      return response;
+      return new ApiResponse<Employee[]>(
+        200,
+        'Data Employee berhasil ditemukan',
+        new Date(),
+        employees,
+        {
+          page,
+          limit: size,
+          totalPage: Math.ceil(totalData / size),
+          totalData,
+        },
+      );
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException(
-          {
-            status: 'error',
-            message: 'Terjadi kesalahan pada server',
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      throw new Error('An error occurred while retrieving reviews');
     }
   }
 
@@ -152,7 +147,12 @@ export class EmployeeService {
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
-    return employee;
+    return new ApiResponse<Employee>(
+      200,
+      'Employee has been fetched',
+      new Date(),
+      employee,
+    );
   }
 
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
@@ -163,7 +163,15 @@ export class EmployeeService {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
     await this.employeeRepository.update(id, updateEmployeeDto);
-    return this.findOne(id);
+    const employee = await this.employeeRepository.findOne({
+      where: { id: id },
+    });
+    return new ApiResponse<Employee>(
+      200,
+      'Employee has been updated',
+      new Date(),
+      employee,
+    );
   }
 
   async remove(id: string) {
@@ -173,7 +181,12 @@ export class EmployeeService {
     if (!existingEmployee) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
-    await this.employeeRepository.remove(existingEmployee);
+    return new ApiResponse<Employee>(
+      200,
+      'Employee has been deleted successfully',
+      new Date(),
+      await this.employeeRepository.remove(existingEmployee),
+    );
   }
 
   generateRandomPassword(length: number = 8): string {
